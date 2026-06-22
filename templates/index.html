@@ -14,15 +14,16 @@
   </header>
 
   <main>
-    <section class="form-card">
-      <h2>Dimensions (mm)</h2>
 
+    <!-- SECTION 1: STEM -->
+    <section class="form-card">
+      <h2>Stem Dimensions (mm)</h2>
       <div class="form-grid">
 
         <div class="field">
           <label for="L">Total Length — L (mm)</label>
           <input type="number" id="L" value="830" min="100" max="5000">
-          <span class="hint">Distance from collar bottom to tip</span>
+          <span class="hint">Collar bottom to tip</span>
         </div>
 
         <div class="field">
@@ -32,42 +33,105 @@
         </div>
 
         <div class="field">
+          <label for="stem_diameter">Stem Diameter (mm)</label>
+          <input type="number" id="stem_diameter" value="12.7" min="5" max="50" step="0.1">
+          <span class="hint">Main rod diameter (Ø12.7mm)</span>
+        </div>
+
+        <div class="field">
           <label for="float_diameter">Float Diameter (mm)</label>
           <input type="number" id="float_diameter" value="25" min="10" max="100">
-          <span class="hint">SS 316 float ball diameter</span>
-        </div>
-
-        <div class="field">
-          <label for="stem_diameter">Stem Diameter (mm)</label>
-          <input type="number" id="stem_diameter" value="10" min="5" max="50">
-          <span class="hint">Main rod diameter</span>
-        </div>
-
-        <div class="field">
-          <label for="adapter_diameter">Adapter Diameter (mm)</label>
-          <input type="number" id="adapter_diameter" value="69" min="20" max="200">
-          <span class="hint">2" BSP adapter outer diameter</span>
+          <span class="hint">SS 316 float ball (Ø25mm)</span>
         </div>
 
         <div class="field">
           <label for="stopper_diameter">Stopper Diameter (mm)</label>
           <input type="number" id="stopper_diameter" value="41" min="10" max="150">
-          <span class="hint">Bottom stopper diameter</span>
+          <span class="hint">Bottom stopper (Ø41mm)</span>
         </div>
 
       </div>
+    </section>
 
+    <!-- SECTION 2: ENCLOSURE -->
+    <section class="form-card">
+      <h2>Enclosure Dimensions (mm)</h2>
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="encl_diameter">Enclosure Diameter (mm)</label>
+          <input type="number" id="encl_diameter" value="85" min="40" max="300">
+          <span class="hint">Circular enclosure width (Ø85mm)</span>
+        </div>
+
+        <div class="field">
+          <label for="encl_h">Enclosure Height (mm)</label>
+          <input type="number" id="encl_h" value="80" min="30" max="300">
+          <span class="hint">Enclosure body height (80mm)</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 3: CONE CONNECTOR -->
+    <section class="form-card">
+      <h2>Cone Connector (mm)</h2>
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="cone_h">Cone Height (mm)</label>
+          <input type="number" id="cone_h" value="35" min="10" max="150">
+          <span class="hint">Tapered section height</span>
+        </div>
+
+        <div class="field">
+          <label for="cone_top_diameter">Cone Top Diameter (mm)</label>
+          <input type="number" id="cone_top_diameter" value="85" min="20" max="300">
+          <span class="hint">Wide end (matches enclosure)</span>
+        </div>
+
+        <div class="field">
+          <label for="cone_bot_diameter">Cone Bottom Diameter (mm)</label>
+          <input type="number" id="cone_bot_diameter" value="36" min="10" max="150">
+          <span class="hint">Narrow end (collar side)</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 4: M-20 GLAND -->
+    <section class="form-card">
+      <h2>M-20 Cable Gland (mm)</h2>
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="gland_diameter">Gland Diameter (mm)</label>
+          <input type="number" id="gland_diameter" value="20" min="5" max="60">
+          <span class="hint">M-20 gland outer diameter</span>
+        </div>
+
+        <div class="field">
+          <label for="gland_depth">Gland Protrusion (mm)</label>
+          <input type="number" id="gland_depth" value="30" min="10" max="100">
+          <span class="hint">How far it sticks out from side</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- GENERATE BUTTON -->
+    <section class="form-card">
       <button id="generate-btn" onclick="generate()">
         Generate 3D Model
       </button>
     </section>
 
-    <!-- Status -->
+    <!-- STATUS -->
     <section id="status-box" class="status-box hidden">
       <div id="status-msg">Processing...</div>
     </section>
 
-    <!-- Download Buttons -->
+    <!-- DOWNLOADS -->
     <section id="downloads" class="downloads hidden">
       <h2>Download Your Files</h2>
       <div class="download-grid">
@@ -89,22 +153,30 @@
       const statusMsg = document.getElementById("status-msg");
       const downloads = document.getElementById("downloads");
 
-      // Collect dimensions from form
       const dimensions = {
-        L:                 document.getElementById("L").value,
-        D2:                document.getElementById("D2").value,
-        float_diameter:    document.getElementById("float_diameter").value,
-        stem_diameter:     document.getElementById("stem_diameter").value,
-        adapter_diameter:  document.getElementById("adapter_diameter").value,
-        stopper_diameter:  document.getElementById("stopper_diameter").value,
+        // Stem
+        L:                  document.getElementById("L").value,
+        D2:                 document.getElementById("D2").value,
+        stem_diameter:      document.getElementById("stem_diameter").value,
+        float_diameter:     document.getElementById("float_diameter").value,
+        stopper_diameter:   document.getElementById("stopper_diameter").value,
+        // Enclosure
+        encl_diameter:      document.getElementById("encl_diameter").value,
+        encl_h:             document.getElementById("encl_h").value,
+        // Cone
+        cone_h:             document.getElementById("cone_h").value,
+        cone_top_diameter:  document.getElementById("cone_top_diameter").value,
+        cone_bot_diameter:  document.getElementById("cone_bot_diameter").value,
+        // Gland
+        gland_diameter:     document.getElementById("gland_diameter").value,
+        gland_depth:        document.getElementById("gland_depth").value,
       };
 
-      // Show loading state
       btn.disabled = true;
-      btn.textContent = "Generating... (this takes ~1-2 min)";
+      btn.textContent = "Generating... (1-2 min)";
       statusBox.classList.remove("hidden");
       statusBox.className = "status-box loading";
-      statusMsg.textContent = "Blender is running in the background. Please wait...";
+      statusMsg.textContent = "Blender is running in background. Please wait...";
       downloads.classList.add("hidden");
 
       try {

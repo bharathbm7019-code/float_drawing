@@ -1,14 +1,35 @@
 def generate_blender_script(dimensions, output_folder):
 
+    # Stem
     L       = float(dimensions.get("L",   830))
     D2      = float(dimensions.get("D2",  780))
+    stem_d  = float(dimensions.get("stem_diameter",  12.7))
     float_d = float(dimensions.get("float_diameter", 25))
-    stem_d  = float(dimensions.get("stem_diameter",  10))
-    adapt_d = float(dimensions.get("adapter_diameter", 69))
     stop_d  = float(dimensions.get("stopper_diameter", 41))
 
-    # Forward slashes only — Blender needs this
-    out = output_folder.replace("\\", "/")
+    # Enclosure
+    encl_d  = float(dimensions.get("encl_diameter", 85))
+    encl_h  = float(dimensions.get("encl_h",        80))
+
+    # Cone
+    cone_h      = float(dimensions.get("cone_h",           35))
+    cone_top_d  = float(dimensions.get("cone_top_diameter", 85))
+    cone_bot_d  = float(dimensions.get("cone_bot_diameter", 36))
+
+    # Gland
+    gland_d     = float(dimensions.get("gland_diameter", 20))
+    gland_depth = float(dimensions.get("gland_depth",    30))
+
+    # Derived values
+    stem_r      = stem_d     / 2
+    float_r     = float_d    / 2
+    stop_r      = stop_d     / 2
+    encl_r      = encl_d     / 2
+    cone_top_r  = cone_top_d / 2
+    cone_bot_r  = cone_bot_d / 2
+    gland_r     = gland_d    / 2
+
+    out      = output_folder.replace("\\", "/")
     obj_path = out + "/model.obj"
     png_path = out + "/render.png"
 
@@ -18,19 +39,37 @@ import math
 import os
 
 S = 0.001
+
+# Stem
 L        = {L}
 D2       = {D2}
-float_r  = {float_d / 2} * S
-stem_r   = {stem_d  / 2} * S
-adapt_r  = {adapt_d / 2} * S
-stop_r   = {stop_d  / 2} * S
+stem_r   = {stem_r}  * S
+float_r  = {float_r} * S
+stop_r   = {stop_r}  * S
+
+# Enclosure
+encl_r      = {encl_r}     * S
+encl_h      = {encl_h}     * S
+
+# Cone
+cone_h      = {cone_h}     * S
+cone_top_r  = {cone_top_r} * S
+cone_bot_r  = {cone_bot_r} * S
+
+# Gland
+gland_r     = {gland_r}     * S
+gland_depth = {gland_depth} * S
+
+# Z positions
+cone_z  = {cone_h}   / 2
+encl_z  = {cone_h}   + {encl_h} / 2
+gland_z = encl_z
+
 obj_path = r"{obj_path}"
 png_path = r"{png_path}"
 
 os.makedirs(os.path.dirname(obj_path), exist_ok=True)
-
 print("=== FLOAT SWITCH SCRIPT START ===")
-print("L =", L, "D2 =", D2)
 
 # Clear scene
 bpy.ops.object.select_all(action='SELECT')
@@ -45,108 +84,52 @@ def make_mat(name, color, metallic=0.8, roughness=0.2):
     bsdf.inputs["Roughness"].default_value  = roughness
     return mat
 
-mat_steel   = make_mat("Steel",   (0.8, 0.8,  0.85, 1))
-mat_float   = make_mat("Float",   (0.7, 0.75, 0.8,  1))
-mat_adapter = make_mat("Adapter", (0.6, 0.62, 0.65, 1))
-mat_stopper = make_mat("Stopper", (0.5, 0.52, 0.55, 1))
-mat_gland   = make_mat("Gland",   (0.3, 0.3,  0.32, 1))
-
-print("Materials created OK")
+mat_steel     = make_mat("Steel",     (0.8,  0.8,  0.85, 1), 0.9, 0.2)
+mat_float     = make_mat("Float",     (0.7,  0.75, 0.8,  1), 0.9, 0.15)
+mat_enclosure = make_mat("Enclosure", (0.55, 0.57, 0.6,  1), 0.7, 0.3)
+mat_cone      = make_mat("Cone",      (0.5,  0.52, 0.55, 1), 0.8, 0.25)
+mat_stopper   = make_mat("Stopper",   (0.5,  0.52, 0.55, 1), 0.8, 0.3)
+mat_gland     = make_mat("Gland",     (0.2,  0.2,  0.22, 1), 0.6, 0.4)
+mat_gland_nut = make_mat("GlandNut",  (0.3,  0.3,  0.32, 1), 0.7, 0.35)
 
 # 1. Stem
 bpy.ops.mesh.primitive_cylinder_add(
-    radius=stem_r, depth=L*S, location=(0, 0, -(L/2)*S))
+    radius=stem_r, depth=L*0.001,
+    location=(0, 0, -(L/2)*0.001))
 o = bpy.context.active_object
-o.name = "Stem"
-o.data.materials.append(mat_steel)
-print("Stem created OK")
+o.name = "Stem_Rod"; o.data.materials.append(mat_steel)
+print("Stem OK")
 
-# 2. Adapter
+# 2. Cone connector
+bpy.ops.mesh.primitive_cone_add(
+    vertices=64,
+    radius1=cone_bot_r, radius2=cone_top_r,
+    depth=cone_h,
+    location=(0, 0, cone_z*0.001))
+o = bpy.context.active_object
+o.name = "Cone_Connector"; o.data.materials.append(mat_cone)
+print("Cone OK")
+
+# 3. Enclosure body
 bpy.ops.mesh.primitive_cylinder_add(
-    radius=adapt_r, depth=50*S, location=(0, 0, 25*S))
+    vertices=64,
+    radius=encl_r, depth=encl_h,
+    location=(0, 0, encl_z*0.001))
 o = bpy.context.active_object
-o.name = "Adapter"
-o.data.materials.append(mat_adapter)
+o.name = "Enclosure_Body"; o.data.materials.append(mat_enclosure)
+print("Enclosure OK")
 
-# 3. Hex flange
+# 4. Enclosure lid
+import bpy as _bpy
+lid_r = encl_r + 0.002
 bpy.ops.mesh.primitive_cylinder_add(
-    vertices=6, radius=36*S, depth=15*S, location=(0, 0, 57.5*S))
+    vertices=64,
+    radius=lid_r, depth=0.004,
+    location=(0, 0, (encl_z*0.001 + encl_h/2 + 0.002)))
 o = bpy.context.active_object
-o.name = "HEX_Flange"
-o.data.materials.append(mat_adapter)
+o.name = "Enclosure_Lid"; o.data.materials.append(mat_enclosure)
 
-# 4. O-Ring
-bpy.ops.mesh.primitive_torus_add(
-    major_radius=adapt_r, minor_radius=2*S, location=(0, 0, 10*S))
-o = bpy.context.active_object
-o.name = "O_Ring"
-mat_o = make_mat("ORing", (0.05, 0.05, 0.05, 1), 0.0, 0.9)
-o.data.materials.append(mat_o)
-
-# 5. BSP Port
+# 5. M-20 Gland body (SIDE of enclosure)
 bpy.ops.mesh.primitive_cylinder_add(
-    radius=5*S, depth=20*S,
-    location=(adapt_r + 10*S, 0, 25*S))
-o = bpy.context.active_object
-o.name = "BSP_Port"
-o.rotation_euler = (0, math.radians(90), 0)
-o.data.materials.append(mat_adapter)
-
-# 6. Gland
-bpy.ops.mesh.primitive_cylinder_add(
-    radius=10*S, depth=20*S, location=(0, 0, 80*S))
-o = bpy.context.active_object
-o.name = "M20_Gland"
-o.data.materials.append(mat_gland)
-
-# 7. Float
-bpy.ops.mesh.primitive_uv_sphere_add(
-    radius=float_r, location=(0, 0, -D2*S))
-o = bpy.context.active_object
-o.name = "Float_D2"
-o.data.materials.append(mat_float)
-bpy.ops.object.shade_smooth()
-
-# 8. Stopper
-bpy.ops.mesh.primitive_cylinder_add(
-    radius=stop_r, depth=15*S,
-    location=(0, 0, -(L - 7.5)*S))
-o = bpy.context.active_object
-o.name = "Stopper"
-o.data.materials.append(mat_stopper)
-
-print("All parts created OK")
-
-# ---- EXPORT OBJ ----
-try:
-    bpy.ops.wm.obj_export(filepath=obj_path)
-    print("OBJ exported OK:", obj_path)
-except Exception as e:
-    print("OBJ export error:", str(e))
-
-# ---- RENDER PNG ----
-try:
-    bpy.ops.object.camera_add(location=(0.3, -0.6, -0.3))
-    cam = bpy.context.active_object
-    cam.rotation_euler = (math.radians(80), 0, math.radians(15))
-    bpy.context.scene.camera = cam
-
-    bpy.ops.object.light_add(type='AREA', location=(0.5, -0.5, 0.5))
-    bpy.context.active_object.data.energy = 5000
-    bpy.ops.object.light_add(type='AREA', location=(-0.5, 0.3, 0.2))
-    bpy.context.active_object.data.energy = 2000
-
-    scene = bpy.context.scene
-    scene.render.engine = 'BLENDER_EEVEE_NEXT'
-    scene.render.resolution_x = 1280
-    scene.render.resolution_y = 720
-    scene.render.filepath = png_path
-    scene.render.image_settings.file_format = 'PNG'
-    bpy.ops.render.render(write_still=True)
-    print("PNG rendered OK:", png_path)
-except Exception as e:
-    print("Render error:", str(e))
-
-print("=== SCRIPT COMPLETE ===")
-"""
-    return script
+    radius=gland_r, depth=gland_depth,
+    location=(encl_r +
