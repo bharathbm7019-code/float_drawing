@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FloatSwitch Automation — SDN-204</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>FloatSwitch 3D Generator</h1>
+    <p>SDN-204 · SHRIDHAN SENSORTEK · Enter dimensions below</p>
+  </header>
+
+  <main>
+    <section class="form-card">
+      <h2>Dimensions (mm)</h2>
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="L">Total Length — L (mm)</label>
+          <input type="number" id="L" value="830" min="100" max="5000">
+          <span class="hint">Distance from collar bottom to tip</span>
+        </div>
+
+        <div class="field">
+          <label for="D2">Switching Point — D2 (mm)</label>
+          <input type="number" id="D2" value="780" min="50" max="4900">
+          <span class="hint">Falling level switch point</span>
+        </div>
+
+        <div class="field">
+          <label for="float_diameter">Float Diameter (mm)</label>
+          <input type="number" id="float_diameter" value="25" min="10" max="100">
+          <span class="hint">SS 316 float ball diameter</span>
+        </div>
+
+        <div class="field">
+          <label for="stem_diameter">Stem Diameter (mm)</label>
+          <input type="number" id="stem_diameter" value="10" min="5" max="50">
+          <span class="hint">Main rod diameter</span>
+        </div>
+
+        <div class="field">
+          <label for="adapter_diameter">Adapter Diameter (mm)</label>
+          <input type="number" id="adapter_diameter" value="69" min="20" max="200">
+          <span class="hint">2" BSP adapter outer diameter</span>
+        </div>
+
+        <div class="field">
+          <label for="stopper_diameter">Stopper Diameter (mm)</label>
+          <input type="number" id="stopper_diameter" value="41" min="10" max="150">
+          <span class="hint">Bottom stopper diameter</span>
+        </div>
+
+      </div>
+
+      <button id="generate-btn" onclick="generate()">
+        Generate 3D Model
+      </button>
+    </section>
+
+    <!-- Status -->
+    <section id="status-box" class="status-box hidden">
+      <div id="status-msg">Processing...</div>
+    </section>
+
+    <!-- Download Buttons -->
+    <section id="downloads" class="downloads hidden">
+      <h2>Download Your Files</h2>
+      <div class="download-grid">
+        <a href="/download/obj" class="download-btn obj">
+          Download OBJ (3D Model)
+        </a>
+        <a href="/download/png" class="download-btn png">
+          Download PNG (Render)
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    async function generate() {
+      const btn = document.getElementById("generate-btn");
+      const statusBox = document.getElementById("status-box");
+      const statusMsg = document.getElementById("status-msg");
+      const downloads = document.getElementById("downloads");
+
+      // Collect dimensions from form
+      const dimensions = {
+        L:                 document.getElementById("L").value,
+        D2:                document.getElementById("D2").value,
+        float_diameter:    document.getElementById("float_diameter").value,
+        stem_diameter:     document.getElementById("stem_diameter").value,
+        adapter_diameter:  document.getElementById("adapter_diameter").value,
+        stopper_diameter:  document.getElementById("stopper_diameter").value,
+      };
+
+      // Show loading state
+      btn.disabled = true;
+      btn.textContent = "Generating... (this takes ~1-2 min)";
+      statusBox.classList.remove("hidden");
+      statusBox.className = "status-box loading";
+      statusMsg.textContent = "Blender is running in the background. Please wait...";
+      downloads.classList.add("hidden");
+
+      try {
+        const response = await fetch("/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dimensions)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          statusBox.className = "status-box success";
+          statusMsg.textContent = "Files generated successfully!";
+          downloads.classList.remove("hidden");
+        } else {
+          statusBox.className = "status-box error";
+          statusMsg.textContent = "Error: " + result.error;
+        }
+
+      } catch (err) {
+        statusBox.className = "status-box error";
+        statusMsg.textContent = "Connection error: " + err.message;
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Generate 3D Model";
+    }
+  </script>
+
+</body>
+</html>

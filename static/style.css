@@ -1,0 +1,151 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0f1117;
+  color: #e0e0e0;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+header {
+  text-align: center;
+  padding: 32px 0 24px;
+}
+
+header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+header p {
+  color: #888;
+  font-size: 14px;
+}
+
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-card {
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.form-card h2 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #aaa;
+}
+
+.field input {
+  background: #0f1117;
+  border: 1px solid #2a2d3a;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 15px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.field input:focus {
+  border-color: #4f7ef7;
+}
+
+.hint {
+  font-size: 11px;
+  color: #555;
+}
+
+#generate-btn {
+  width: 100%;
+  padding: 14px;
+  background: #4f7ef7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#generate-btn:hover { background: #3a67e0; }
+#generate-btn:disabled { background: #2a2d3a; color: #555; cursor: not-allowed; }
+
+.status-box {
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hidden { display: none; }
+
+.status-box.loading { background: #1a2040; border: 1px solid #4f7ef7; color: #7aa3f7; }
+.status-box.success { background: #0f2a1a; border: 1px solid #2ecc71; color: #2ecc71; }
+.status-box.error   { background: #2a0f0f; border: 1px solid #e74c3c; color: #e74c3c; }
+
+.downloads {
+  background: #1a1d27;
+  border: 1px solid #2a2d3a;
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.downloads h2 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.download-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.download-btn {
+  display: block;
+  text-align: center;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.download-btn:hover { opacity: 0.85; }
+.download-btn.obj { background: #1a3a2a; border: 1px solid #2ecc71; color: #2ecc71; }
+.download-btn.png { background: #1a2a3a; border: 1px solid #4f7ef7; color: #7aa3f7; }
