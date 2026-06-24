@@ -8,22 +8,9 @@ body {
   padding: 24px;
 }
 
-header {
-  text-align: center;
-  padding: 32px 0 24px;
-}
-
-header h1 {
-  font-size: 28px;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 8px;
-}
-
-header p {
-  color: #888;
-  font-size: 14px;
-}
+header { text-align: center; padding: 32px 0 24px; }
+header h1 { font-size: 28px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+header p  { color: #888; font-size: 14px; }
 
 main {
   max-width: 760px;
@@ -40,32 +27,17 @@ main {
   padding: 28px;
 }
 
-.form-card h2 {
-  font-size: 18px;
-  font-weight: 500;
-  color: #ffffff;
-  margin-bottom: 20px;
-}
+.form-card h2 { font-size: 18px; font-weight: 500; color: #fff; margin-bottom: 20px; }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #aaa;
-}
-
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 500; color: #aaa; }
 .field input {
   background: #0f1117;
   border: 1px solid #2a2d3a;
@@ -76,15 +48,8 @@ main {
   outline: none;
   transition: border-color 0.2s;
 }
-
-.field input:focus {
-  border-color: #4f7ef7;
-}
-
-.hint {
-  font-size: 11px;
-  color: #555;
-}
+.field input:focus { border-color: #4f7ef7; }
+.hint { font-size: 11px; color: #555; }
 
 #generate-btn {
   width: 100%;
@@ -97,10 +62,25 @@ main {
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
+  margin-bottom: 10px;
 }
-
-#generate-btn:hover { background: #3a67e0; }
+#generate-btn:hover    { background: #3a67e0; }
 #generate-btn:disabled { background: #2a2d3a; color: #555; cursor: not-allowed; }
+
+#drawing-btn {
+  width: 100%;
+  padding: 14px;
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#drawing-btn:hover    { background: #1e8449; }
+#drawing-btn:disabled { background: #2a2d3a; color: #555; cursor: not-allowed; }
 
 .status-box {
   border-radius: 10px;
@@ -108,12 +88,10 @@ main {
   font-size: 14px;
   font-weight: 500;
 }
-
-.hidden { display: none; }
-
-.status-box.loading { background: #1a2040; border: 1px solid #4f7ef7; color: #7aa3f7; }
-.status-box.success { background: #0f2a1a; border: 1px solid #2ecc71; color: #2ecc71; }
-.status-box.error   { background: #2a0f0f; border: 1px solid #e74c3c; color: #e74c3c; }
+.hidden  { display: none; }
+.loading { background: #1a2040; border: 1px solid #4f7ef7; color: #7aa3f7; }
+.success { background: #0f2a1a; border: 1px solid #2ecc71; color: #2ecc71; }
+.error   { background: #2a0f0f; border: 1px solid #e74c3c; color: #e74c3c; }
 
 .downloads {
   background: #1a1d27;
@@ -121,17 +99,11 @@ main {
   border-radius: 12px;
   padding: 28px;
 }
-
-.downloads h2 {
-  font-size: 18px;
-  font-weight: 500;
-  color: #fff;
-  margin-bottom: 16px;
-}
+.downloads h2 { font-size: 18px; font-weight: 500; color: #fff; margin-bottom: 16px; }
 
 .download-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
 }
 
@@ -145,7 +117,7 @@ main {
   text-decoration: none;
   transition: opacity 0.2s;
 }
-
 .download-btn:hover { opacity: 0.85; }
 .download-btn.obj { background: #1a3a2a; border: 1px solid #2ecc71; color: #2ecc71; }
 .download-btn.png { background: #1a2a3a; border: 1px solid #4f7ef7; color: #7aa3f7; }
+.download-btn.pdf { background: #2a1a3a; border: 1px solid #9b59b6; color: #c39bd3; }

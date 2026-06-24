@@ -17,18 +17,12 @@ def index():
 @app.route("/generate", methods=["POST"])
 def generate():
     try:
-        # 1. Get dimensions from the form
-        dimensions = request.get_json()
+        dimensions    = request.get_json()
         print(f"Received dimensions: {dimensions}")
-
-        # 2. Get paths
         blender_path  = get_blender_path()
         output_folder = get_output_folder()
+        script_code   = generate_blender_script(dimensions, output_folder)
 
-        # 3. Generate the bpy script with those dimensions
-        script_code = generate_blender_script(dimensions, output_folder)
-
-        # 4. Save script to a temporary file
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".py", delete=False
         ) as tmp:
@@ -38,25 +32,16 @@ def generate():
         print(f"Script saved to: {script_path}")
         print(f"Running Blender from: {blender_path}")
 
-        # 5. Run Blender in headless (background) mode
         result = subprocess.run(
             [blender_path, "--background", "--python", script_path],
-            capture_output=True,
-            text=True,
-            timeout=300  # 5 min timeout
+            capture_output=True, text=True, timeout=300
         )
 
-     # Print FULL Blender output
-        print("="*60)
-        print("BLENDER STDOUT:")
-        print(result.stdout)
-        print("="*60)
-        print("BLENDER STDERR:")
-        print(result.stderr)
-        print("="*60)
+        print("=" * 60)
+        print("BLENDER STDOUT:"); print(result.stdout)
+        print("BLENDER STDERR:"); print(result.stderr)
         print("Return code:", result.returncode)
 
-        # 6. Check output files exist
         obj_path = os.path.join(output_folder, "model.obj")
         png_path = os.path.join(output_folder, "render.png")
 
@@ -65,7 +50,7 @@ def generate():
             "png": os.path.exists(png_path),
         }
 
-        if not any(files_ready.values()):
+        if not files_ready["obj"]:
             return jsonify({
                 "success": False,
                 "error": "Blender ran but no output files were created.",
@@ -84,22 +69,34 @@ def generate():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@app.route("/generate-drawing", methods=["POST"])
+def generate_drawing():
+    try:
+        from drawing_generator import generate_drawing_pdf
+        dimensions    = request.get_json()
+        output_folder = get_output_folder()
+        pdf_path      = os.path.join(output_folder, "drawing.pdf")
+        generate_drawing_pdf(dimensions, pdf_path)
+        return jsonify({"success": True, "message": "Drawing generated!"})
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route("/download/<filetype>")
 def download(filetype):
     output_folder = get_output_folder()
-
     file_map = {
         "obj": os.path.join(output_folder, "model.obj"),
         "png": os.path.join(output_folder, "render.png"),
+        "pdf": os.path.join(output_folder, "drawing.pdf"),
     }
-
     if filetype not in file_map:
         return "Invalid file type", 400
-
     filepath = file_map[filetype]
     if not os.path.exists(filepath):
         return "File not found — please generate first", 404
-
     return send_file(filepath, as_attachment=True)
 
 

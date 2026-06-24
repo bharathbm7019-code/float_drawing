@@ -19,37 +19,31 @@
     <section class="form-card">
       <h2>Stem Dimensions (mm)</h2>
       <div class="form-grid">
-
         <div class="field">
           <label for="L">Total Length — L (mm)</label>
           <input type="number" id="L" value="830" min="100" max="5000">
           <span class="hint">Collar bottom to tip</span>
         </div>
-
         <div class="field">
           <label for="D2">Switching Point — D2 (mm)</label>
           <input type="number" id="D2" value="780" min="50" max="4900">
           <span class="hint">Falling level switch point</span>
         </div>
-
         <div class="field">
           <label for="stem_diameter">Stem Diameter (mm)</label>
           <input type="number" id="stem_diameter" value="12.7" min="5" max="50" step="0.1">
-          <span class="hint">Main rod diameter (Ø12.7mm)</span>
+          <span class="hint">Main rod diameter</span>
         </div>
-
         <div class="field">
           <label for="float_diameter">Float Diameter (mm)</label>
           <input type="number" id="float_diameter" value="25" min="10" max="100">
-          <span class="hint">SS 316 float ball (Ø25mm)</span>
+          <span class="hint">SS 316 float ball</span>
         </div>
-
         <div class="field">
           <label for="stopper_diameter">Stopper Diameter (mm)</label>
           <input type="number" id="stopper_diameter" value="41" min="10" max="150">
-          <span class="hint">Bottom stopper (Ø41mm)</span>
+          <span class="hint">Bottom stopper</span>
         </div>
-
       </div>
     </section>
 
@@ -57,72 +51,65 @@
     <section class="form-card">
       <h2>Enclosure Dimensions (mm)</h2>
       <div class="form-grid">
-
         <div class="field">
           <label for="encl_diameter">Enclosure Diameter (mm)</label>
           <input type="number" id="encl_diameter" value="85" min="40" max="300">
-          <span class="hint">Circular enclosure width (Ø85mm)</span>
+          <span class="hint">Circular enclosure width</span>
         </div>
-
         <div class="field">
           <label for="encl_h">Enclosure Height (mm)</label>
           <input type="number" id="encl_h" value="80" min="30" max="300">
-          <span class="hint">Enclosure body height (80mm)</span>
+          <span class="hint">Enclosure body height</span>
         </div>
-
       </div>
     </section>
 
-    <!-- SECTION 3: CONE CONNECTOR -->
+    <!-- SECTION 3: CONE -->
     <section class="form-card">
       <h2>Cone Connector (mm)</h2>
       <div class="form-grid">
-
         <div class="field">
           <label for="cone_h">Cone Height (mm)</label>
           <input type="number" id="cone_h" value="35" min="10" max="150">
           <span class="hint">Tapered section height</span>
         </div>
-
         <div class="field">
           <label for="cone_top_diameter">Cone Top Diameter (mm)</label>
           <input type="number" id="cone_top_diameter" value="85" min="20" max="300">
-          <span class="hint">Wide end (matches enclosure)</span>
+          <span class="hint">Wide end</span>
         </div>
-
         <div class="field">
           <label for="cone_bot_diameter">Cone Bottom Diameter (mm)</label>
           <input type="number" id="cone_bot_diameter" value="36" min="10" max="150">
           <span class="hint">Narrow end (collar side)</span>
         </div>
-
       </div>
     </section>
 
-    <!-- SECTION 4: M-20 GLAND -->
+    <!-- SECTION 4: GLAND -->
     <section class="form-card">
       <h2>M-20 Cable Gland (mm)</h2>
       <div class="form-grid">
-
         <div class="field">
           <label for="gland_diameter">Gland Diameter (mm)</label>
           <input type="number" id="gland_diameter" value="20" min="5" max="60">
           <span class="hint">M-20 gland outer diameter</span>
         </div>
-
         <div class="field">
           <label for="gland_depth">Gland Protrusion (mm)</label>
           <input type="number" id="gland_depth" value="30" min="10" max="100">
-          <span class="hint">How far it sticks out from side</span>
+          <span class="hint">How far it sticks out</span>
         </div>
-
       </div>
     </section>
 
-    <!-- GENERATE BUTTON -->
+    <!-- BUTTONS -->
     <section class="form-card">
       <button id="generate-btn" onclick="generate()">
         Generate 3D Model
+      </button>
+      <button id="drawing-btn" onclick="generateDrawing()">
+        Generate 2D Drawing (PDF)
       </button>
     </section>
 
@@ -141,69 +128,93 @@
         <a href="/download/png" class="download-btn png">
           Download PNG (Render)
         </a>
+        <a href="/download/pdf" class="download-btn pdf">
+          Download PDF (2D Drawing)
+        </a>
       </div>
     </section>
 
   </main>
 
   <script>
+    function getDimensions() {
+      return {
+        L:                 document.getElementById("L").value,
+        D2:                document.getElementById("D2").value,
+        stem_diameter:     document.getElementById("stem_diameter").value,
+        float_diameter:    document.getElementById("float_diameter").value,
+        stopper_diameter:  document.getElementById("stopper_diameter").value,
+        encl_diameter:     document.getElementById("encl_diameter").value,
+        encl_h:            document.getElementById("encl_h").value,
+        cone_h:            document.getElementById("cone_h").value,
+        cone_top_diameter: document.getElementById("cone_top_diameter").value,
+        cone_bot_diameter: document.getElementById("cone_bot_diameter").value,
+        gland_diameter:    document.getElementById("gland_diameter").value,
+        gland_depth:       document.getElementById("gland_depth").value,
+      };
+    }
+
+    function setStatus(type, msg) {
+      const box = document.getElementById("status-box");
+      box.classList.remove("hidden");
+      box.className = "status-box " + type;
+      document.getElementById("status-msg").textContent = msg;
+    }
+
     async function generate() {
       const btn = document.getElementById("generate-btn");
-      const statusBox = document.getElementById("status-box");
-      const statusMsg = document.getElementById("status-msg");
-      const downloads = document.getElementById("downloads");
-
-      const dimensions = {
-        // Stem
-        L:                  document.getElementById("L").value,
-        D2:                 document.getElementById("D2").value,
-        stem_diameter:      document.getElementById("stem_diameter").value,
-        float_diameter:     document.getElementById("float_diameter").value,
-        stopper_diameter:   document.getElementById("stopper_diameter").value,
-        // Enclosure
-        encl_diameter:      document.getElementById("encl_diameter").value,
-        encl_h:             document.getElementById("encl_h").value,
-        // Cone
-        cone_h:             document.getElementById("cone_h").value,
-        cone_top_diameter:  document.getElementById("cone_top_diameter").value,
-        cone_bot_diameter:  document.getElementById("cone_bot_diameter").value,
-        // Gland
-        gland_diameter:     document.getElementById("gland_diameter").value,
-        gland_depth:        document.getElementById("gland_depth").value,
-      };
-
+      document.getElementById("downloads").classList.add("hidden");
       btn.disabled = true;
       btn.textContent = "Generating... (1-2 min)";
-      statusBox.classList.remove("hidden");
-      statusBox.className = "status-box loading";
-      statusMsg.textContent = "Blender is running in background. Please wait...";
-      downloads.classList.add("hidden");
+      setStatus("loading", "Blender is running in background. Please wait...");
 
       try {
-        const response = await fetch("/generate", {
+        const res = await fetch("/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dimensions)
+          body: JSON.stringify(getDimensions())
         });
-
-        const result = await response.json();
-
+        const result = await res.json();
         if (result.success) {
-          statusBox.className = "status-box success";
-          statusMsg.textContent = "Files generated successfully!";
-          downloads.classList.remove("hidden");
+          setStatus("success", "3D Model generated successfully!");
+          document.getElementById("downloads").classList.remove("hidden");
         } else {
-          statusBox.className = "status-box error";
-          statusMsg.textContent = "Error: " + result.error;
+          setStatus("error", "Error: " + result.error);
         }
-
       } catch (err) {
-        statusBox.className = "status-box error";
-        statusMsg.textContent = "Connection error: " + err.message;
+        setStatus("error", "Connection error: " + err.message);
       }
 
       btn.disabled = false;
       btn.textContent = "Generate 3D Model";
+    }
+
+    async function generateDrawing() {
+      const btn = document.getElementById("drawing-btn");
+      document.getElementById("downloads").classList.add("hidden");
+      btn.disabled = true;
+      btn.textContent = "Generating PDF...";
+      setStatus("loading", "Creating 2D technical drawing...");
+
+      try {
+        const res = await fetch("/generate-drawing", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(getDimensions())
+        });
+        const result = await res.json();
+        if (result.success) {
+          setStatus("success", "2D Drawing ready! Click Download PDF below.");
+          document.getElementById("downloads").classList.remove("hidden");
+        } else {
+          setStatus("error", "Error: " + result.error);
+        }
+      } catch (err) {
+        setStatus("error", "Connection error: " + err.message);
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Generate 2D Drawing (PDF)";
     }
   </script>
 
