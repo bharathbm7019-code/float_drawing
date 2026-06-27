@@ -1,6 +1,8 @@
 def generate_blender_script(dimensions, output_folder):
 
+
     # ── Inputs ──────────────────────────────────────────────
+    flange = dimensions.get("flange", "None")
     L           = float(dimensions.get("L",               830))
     D2          = float(dimensions.get("D2",              780))
     stem_d      = float(dimensions.get("stem_diameter",  12.7))
@@ -13,7 +15,14 @@ def generate_blender_script(dimensions, output_folder):
     cone_bot_d  = float(dimensions.get("cone_bot_diameter",36))
     gland_d     = float(dimensions.get("gland_diameter",   20))
     gland_depth = float(dimensions.get("gland_depth",      30))
-
+    flange_od = 120        # Outside diameter (mm)
+    flange_id = stem_d + 4 # Centre hole diameter (mm)
+    flange_thk = 12        # Flange thickness (mm)
+    bolt_circle = 90       # PCD (mm)
+    bolt_dia = 12          # Bolt hole diameter (mm)
+    bolt_count = 4
+    neck_dia = 50          # Neck OD (mm)
+    neck_h = 20            # Neck height (mm)
     # ── Derived (in mm) ─────────────────────────────────────
     stem_r      = stem_d     / 2
     float_r     = float_d    / 2
@@ -28,6 +37,8 @@ def generate_blender_script(dimensions, output_folder):
     encl_z   = cone_h + encl_h / 2
     lid_z    = cone_h + encl_h + 2
     gland_z  = encl_z
+    flange_z = cone_h + flange_thk / 2
+    neck_z = flange_z + flange_thk / 2 + neck_h / 2
 
     # Camera math (all in metres)
     S            = 0.001
@@ -63,9 +74,17 @@ def generate_blender_script(dimensions, output_folder):
         f"encl_z      = {encl_z}    * S",
         f"lid_z       = {lid_z}     * S",
         f"gland_z     = {gland_z}   * S",
-        f'obj_path    = r"{obj_path}"',
-        f'png_path    = r"{png_path}"',
-        "",
+        f'flange_material = "{flange}"',
+        f"flange_od   = {flange_od} * S",
+        f"flange_id   = {flange_id} * S",
+        f"flange_thk  = {flange_thk} * S",
+        f"bolt_circle = {bolt_circle} * S",
+        f"bolt_dia    = {bolt_dia} * S",
+        f"bolt_count  = {bolt_count}",
+        f"neck_dia    = {neck_dia} * S",
+        f"neck_h      = {neck_h} * S",
+        f"flange_z    = {flange_z} * S",
+        f"neck_z      = {neck_z} * S",
         "os.makedirs(os.path.dirname(obj_path), exist_ok=True)",
         "print('=== START ===')",
         "",
@@ -95,12 +114,66 @@ def generate_blender_script(dimensions, output_folder):
         "",
         "# 2. Cone",
         "bpy.ops.mesh.primitive_cone_add(vertices=64, radius1=cone_bot_r, radius2=cone_top_r, depth=cone_h, location=(0,0,cone_z))",
-        "o=bpy.context.active_object; o.name='Cone'; o.data.materials.append(mc)",
+        "o=bpy.context.active_object; o.name='Cone'; o.data.materials.append(mc)""# 2A. Flange",
+        "if '" + flange + "' != 'None':",
+        "    bpy.ops.mesh.primitive_cylinder_add(",
+        "        vertices=64,",
+        "        radius=flange_od/2,",
+        "        depth=flange_thk,",
+        "        location=(0,0,flange_z)",
+        "    )",
+        "    o = bpy.context.active_object",
+        "    o.name = 'Flange'",
+        "    o.data.materials.append(ms)",
         "",
         "# 3. Enclosure",
         "bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=encl_r, depth=encl_h, location=(0,0,encl_z))",
         "o=bpy.context.active_object; o.name='Enclosure'; o.data.materials.append(me)",
         "",
+        "# 2A. Industrial Flange",
+        "if flange_material != 'None':",
+
+        "    bpy.ops.mesh.primitive_cylinder_add(",
+        "        vertices=64,",
+        "        radius=flange_od/2,",
+        "        depth=flange_thk,",
+        "        location=(0,0,flange_z)",
+        "    )",
+        "    flange_obj = bpy.context.active_object",
+        "    flange_obj.name = 'Flange'",
+        "    flange_obj.data.materials.append(ms)",
+
+        "    bpy.ops.mesh.primitive_cylinder_add(",
+        "        vertices=64,",
+        "        radius=neck_dia/2,",
+        "        depth=neck_h,", 
+        "        location=(0,0,neck_z)",
+        "    )",
+        "    neck = bpy.context.active_object",
+        "    neck.name = 'FlangeNeck'",
+        "    neck.data.materials.append(ms)",
+
+        "    import math",
+        "    for i in range(bolt_count):",
+        "        ang = math.radians(i * (360 / bolt_count))", 
+        "        x = (bolt_circle/2) * math.cos(ang)",
+        "        y = (bolt_circle/2) * math.sin(ang)",
+
+        "        bpy.ops.mesh.primitive_cylinder_add(",
+        "            vertices=32,",
+        "            radius=bolt_dia/2,",
+        "            depth=flange_thk + 0.002,",
+        "            location=(x,y,flange_z)",
+        "        )",
+        "        hole = bpy.context.active_object",
+        "        hole.name = f'BoltHole{i}'",
+        "    bpy.context.view_layer.objects.active = flange_obj",
+        "    for obj in bpy.data.objects:",
+        "        if obj.name.startswith('BoltHole'):",
+        "            mod = flange_obj.modifiers.new(name='Bool', type='BOOLEAN')",
+        "            mod.operation = 'DIFFERENCE'",
+        "            mod.object = obj",
+        "            bpy.ops.object.modifier_apply(modifier=mod.name)",
         "# 4. Lid",
         "bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=encl_r+0.002, depth=0.004, location=(0,0,lid_z))",
         "o=bpy.context.active_object; o.name='Lid'; o.data.materials.append(me)",

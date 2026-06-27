@@ -10,8 +10,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
 from reportlab.lib import colors
 import os
-from pypdf import PdfReader, PdfWriter, Transformation
-from io import BytesIO
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -93,12 +91,54 @@ def generate_drawing_pdf(dimensions, output_path):
     PW, PH = landscape(A3)
     MARGIN = 10 * mm
 
-    packet = BytesIO()
-    c = canvas.Canvas(packet, pagesize=landscape(A3))
+    c = canvas.Canvas(output_path, pagesize=landscape(A3))
     c.setTitle("SDN-204 Float Switch Technical Drawing")
 
+    # ── Border ────────────────────────────────────────────────────────────────
+    c.setLineWidth(0.8)
+    c.setStrokeColor(colors.black)
+    c.rect(MARGIN, MARGIN, PW - 2*MARGIN, PH - 2*MARGIN, fill=0)
+
     # ── Title block ───────────────────────────────────────────────────────────
-    c.setFont("Helvetica", 4.5)
+    tb_h = 35 * mm
+    c.setLineWidth(0.4)
+    c.rect(MARGIN, MARGIN, PW - 2*MARGIN, tb_h, fill=0)
+
+    col1 = MARGIN + (PW - 2*MARGIN) * 0.35
+    col2 = MARGIN + (PW - 2*MARGIN) * 0.65
+    c.line(col1, MARGIN, col1, MARGIN + tb_h)
+    c.line(col2, MARGIN, col2, MARGIN + tb_h)
+
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(MARGIN + 3*mm, MARGIN + tb_h - 9*mm, "SHRIDHAN SENSORTEK PVT. LTD.")
+    c.setFont("Helvetica", 6)
+    c.drawString(MARGIN + 3*mm, MARGIN + tb_h - 15*mm, "COPY RIGHT & CONFIDENTIAL")
+    c.setFont("Helvetica", 5.5)
+    c.drawString(MARGIN + 3*mm, MARGIN + tb_h - 20*mm,
+                 "Not to be reproduced without written permission.")
+
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString((MARGIN + col1) / 2, MARGIN + tb_h - 16*mm, "FLOAT SWITCH")
+    c.setFont("Helvetica", 7)
+    c.drawCentredString((MARGIN + col1) / 2, MARGIN + tb_h - 22*mm,
+                        "MODEL: SDN-204  |  SS 316")
+
+    c.setFont("Helvetica-Bold", 6.5)
+    c.drawString(col1 + 3*mm, MARGIN + tb_h - 8*mm, "ELECTRICAL SPECIFICATION:")
+    c.setFont("Helvetica", 6)
+    for i, s in enumerate([
+        "CONTACT FORM  : SPDT (1NO + 1NC)",
+        "VOLTAGE       : 250VAC / 500VDC",
+        "CURRENT MAX   : 1.5A",
+        "CONTACT VA    : 50VA MAX",
+        "MATERIAL      : SS 316",
+    ]):
+        c.drawString(col1 + 3*mm, MARGIN + tb_h - 15*mm - i*4.5*mm, s)
+
+    c.setFont("Helvetica-Bold", 6.5)
+    c.drawString(col2 + 3*mm, MARGIN + tb_h - 8*mm, "DIMENSIONS & INFO:")
+    c.setFont("Helvetica", 6)
     for i, inf in enumerate([
         "L   = " + str(int(L))             + " mm  (Total Length)",
         "D2  = " + str(int(D2))             + " mm  (Falling Switch Point)",
@@ -110,14 +150,57 @@ def generate_drawing_pdf(dimensions, output_path):
         "GLAND      = M" + str(int(gland_d)) + " x " + str(int(gland_depth)) + " mm",
         "DRG NO: SDN-204-001  |  REV: A  |  UNITS: mm",
     ]):
-     
+        c.drawString(col2 + 3*mm, MARGIN + tb_h - 15*mm - i*4*mm, inf)
+
+    # ── Notes panel ───────────────────────────────────────────────────────────
+    note_x = MARGIN + 5*mm
+    note_y = MARGIN + tb_h + 5*mm
+    note_w = 48 * mm
+    draw_h_area = PH - MARGIN - 8*mm - note_y
+
+    c.setLineWidth(0.3)
+    c.line(note_x + note_w, note_y, note_x + note_w, note_y + draw_h_area)
+
+    c.setFont("Helvetica-Bold", 7)
+    c.setFillColor(colors.black)
+    c.drawString(note_x + 2*mm, note_y + draw_h_area - 8*mm, "NOTES:")
+    c.setFont("Helvetica", 6)
+    for i, n in enumerate([
+        "1. Switch changes form on FALLING",
+        "   level at D2.",
+        "",
+        "2. Reference from Collar bottom.",
+        "",
+        "3. Switch tolerance: +/- 2 mm",
+        "",
+        "4. Qty: 01 No.",
+        "",
+        "ADAPTER DETAILS:",
+        "  2 BSP (M)",
+        "  Outer Dia: " + str(int(adapter_od)) + " mm",
+        "  HEX: 36 A/F",
+        "  O-Ring groove @ 10mm",
+        "  1/4 BSP(M) side port",
+        "",
+        "CABLE GLAND:",
+        "  M-20, Side mounted",
+        "  Dia: " + str(int(gland_d)) + " mm",
+        "  Protrusion: " + str(int(gland_depth)) + " mm",
+        "",
+        "ENCLOSURE:",
+        "  Dia: " + str(int(encl_d)) + " mm",
+        "  Height: " + str(int(encl_h)) + " mm",
+        "  Cone H: " + str(int(cone_h)) + " mm",
+    ]):
+        c.drawString(note_x + 2*mm, note_y + draw_h_area - 16*mm - i*5*mm, n)
+
     # ── Drawing viewport ──────────────────────────────────────────────────────
-     draw_x0 = 25 * mm
-     draw_x1 = PW - 25 * mm
-     draw_y0 = 25 * mm
-     draw_y1 = PH - 25 * mm
-     dw = draw_x1 - draw_x0
-     dh = draw_y1 - draw_y0
+    draw_x0 = note_x + note_w + 5*mm
+    draw_x1 = PW - MARGIN - 5*mm
+    draw_y0  = MARGIN + tb_h + 5*mm
+    draw_y1  = PH - MARGIN - 5*mm
+    dw = draw_x1 - draw_x0
+    dh = draw_y1 - draw_y0
 
     # ── TRUE-TO-SCALE calculation ─────────────────────────────────────────────
     # Everything below ref=collar_bottom goes downward (negative mm),
@@ -218,7 +301,7 @@ def generate_drawing_pdf(dimensions, output_path):
     # ─────────────────────────────────────────────────────────────────────────
     # DIMENSION LINES
     # ─────────────────────────────────────────────────────────────────────────
-    c.setFont("Helvetica", 4.5)
+    c.setFont("Helvetica", 6)
     c.setFillColor(colors.black)
     off1 = 12 * mm    # primary offset from part edge
 
@@ -250,7 +333,7 @@ def generate_drawing_pdf(dimensions, output_path):
     # Adapter OD  (horizontal, at collar bottom)
     dim_horizontal(c, px(-adapter_od/2), px(adapter_od/2),
                    py(-(flange_thk if flange_type != "None" else 0) - 2),
-                   str(int(adapter_od)) + " OD", off=-10*mm)
+                   str(int(adapter_od)) + " OD", off=-9*mm)
 
     # Float diameter
     dim_horizontal(c, px(-float_d/2), px(float_d/2),
@@ -261,18 +344,18 @@ def generate_drawing_pdf(dimensions, output_path):
     if flange_type != "None":
         dim_horizontal(c, px(-flange_od/2), px(flange_od/2),
                        py(-flange_thk),
-                       str(int(flange_od)) + " OD", off=-6*mm)
+                       str(int(flange_od)) + " OD", off=-8*mm)
 
     # ─────────────────────────────────────────────────────────────────────────
     # PART LABELS  (leader lines with text)
     # ─────────────────────────────────────────────────────────────────────────
-    label_x = px(encl_d/2 + gland_depth + 40)
+    label_x = px(encl_d/2 + gland_depth + 10)
 
     def leader(c, from_x, from_y, to_x, to_y, text):
         c.setLineWidth(0.2)
         c.setStrokeColor(colors.black)
         c.line(from_x, from_y, to_x, to_y)
-        c.setFont("Helvetica", 4.5)
+        c.setFont("Helvetica", 5.5)
         c.setFillColor(colors.black)
         c.drawString(to_x + 1*mm, to_y - 1.5, text)
 
@@ -288,48 +371,29 @@ def generate_drawing_pdf(dimensions, output_path):
               label_x,           py(-L * 0.4),
               "STEM " + str(stem_d) + "ø SS316")
 
-    leader(c, px(encl_d/2),     py(encl_base + encl_h * 0.3),
-              label_x,           py(encl_base + encl_h * 0.3),
+    leader(c, px(encl_d/2),     py(encl_base + encl_h * 0.5),
+              label_x,           py(encl_base + encl_h * 0.5),
               "ENCLOSURE " + str(int(encl_d)) + "ø × " + str(int(encl_h)))
 
     leader(c, px(encl_d/2 + gland_depth), py(gland_cy),
               label_x,                     py(gland_cy),
               "M-" + str(int(gland_d)) + " GLAND")
 
+    leader(c, px(adapter_od/2), py(cone_h/2),
+              label_x,           py(cone_h/2),
+              "2-BSP ADAPTER " + str(int(adapter_od)) + "ø")
+
     if flange_type != "None":
         leader(c, px(flange_od/2), py(-flange_thk/2),
                   label_x,          py(-flange_thk/2),
                   flange_type + " FLANGE " + str(int(flange_od)) + "ø")
 
+    # ── Drawing title ─────────────────────────────────────────────────────────
+    c.setFont("Helvetica-Bold", 8)
+    c.setFillColor(colors.black)
+    c.drawCentredString(draw_x0 + dw/2, draw_y1 - 4*mm,
+                        "TECHNICAL DRAWING  |  SDN-204 FLOAT SWITCH  |  SHRIDHAN SENSORTEK")
+
     c.save()
-    packet.seek(0)
-
-    template_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        "Drawing-Template-EU.pdf"
-    )
-
-    overlay_pdf = PdfReader(packet)
-    template_pdf = PdfReader(template_path)
-
-    page = template_pdf.pages[0]
-    overlay_page = overlay_pdf.pages[0]
-
-    # Rotate to portrait and place beside Shridhan logo
-    overlay_page.add_transformation(
-        Transformation()
-        .scale(1.4)
-        .rotate(90)
-        .translate(tx=1200, ty=-480)
-    )
-
-    page.merge_page(overlay_page)
-
-    writer = PdfWriter()
-    writer.add_page(page)
-
-    with open(output_path, "wb") as output:
-        writer.write(output)
-
-    print("Drawing generated successfully.")
+    print("PDF saved: " + output_path)
     return output_path
