@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FloatSwitch Automation — SDN-204</title>
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    /* Derived fields are shown but not editable — driven by the
+       Enclosure Type dropdown instead of manual entry. */
+    input[readonly] {
+      background: #f0f0f0;
+      color: #555;
+      cursor: not-allowed;
+    }
+    .field .hint.derived {
+      color: #b00;
+      font-style: italic;
+    }
+  </style>
 </head>
 <body>
 
@@ -81,17 +94,27 @@
 
     <!-- SECTION 2: ENCLOSURE -->
     <section class="form-card">
-      <h2>Enclosure Dimensions (mm)</h2>
+      <h2>Enclosure (Cast.Al)</h2>
       <div class="form-grid">
         <div class="field">
+          <label for="encl_type">Enclosure Type</label>
+          <select id="encl_type" onchange="applyEnclosurePreset()">
+            <option value="80x70">Cast.Al 80ø × 70 (Cone 30mm)</option>
+            <option value="85x80" selected>Cast.Al 85ø × 80 (Cone 35mm)</option>
+            <option value="100x90">Cast.Al 100ø × 90 (Cone 40mm)</option>
+            <option value="120x100">Cast.Al 120ø × 100 (Cone 45mm)</option>
+          </select>
+          <span class="hint">Standard Cast.Al enclosure size</span>
+        </div>
+        <div class="field">
           <label for="encl_diameter">Enclosure Diameter (mm)</label>
-          <input type="number" id="encl_diameter" value="85" min="40" max="300">
-          <span class="hint">Circular enclosure width</span>
+          <input type="number" id="encl_diameter" value="85" readonly>
+          <span class="hint derived">Set by Enclosure Type</span>
         </div>
         <div class="field">
           <label for="encl_h">Enclosure Height (mm)</label>
-          <input type="number" id="encl_h" value="80" min="30" max="300">
-          <span class="hint">Enclosure body height</span>
+          <input type="number" id="encl_h" value="80" readonly>
+          <span class="hint derived">Set by Enclosure Type</span>
         </div>
         <div class="field">
           <label for="lid_thk">Lid Thickness (mm)</label>
@@ -107,8 +130,8 @@
       <div class="form-grid">
         <div class="field">
           <label for="cone_h">Cone Height (mm)</label>
-          <input type="number" id="cone_h" value="35" min="10" max="150">
-          <span class="hint">Tapered section height</span>
+          <input type="number" id="cone_h" value="35" readonly>
+          <span class="hint derived">Set by Enclosure Type</span>
         </div>
         <div class="field">
           <label for="adapter_od">Adapter Outer Diameter (mm)</label>
@@ -117,8 +140,8 @@
         </div>
         <div class="field">
           <label for="cone_top_diameter">Cone Top Diameter (mm)</label>
-          <input type="number" id="cone_top_diameter" value="85" min="20" max="300">
-          <span class="hint">Wide end (enclosure side)</span>
+          <input type="number" id="cone_top_diameter" value="85" readonly>
+          <span class="hint derived">Matches enclosure diameter</span>
         </div>
         <div class="field">
           <label for="cone_bot_diameter">Cone Bottom Diameter (mm)</label>
@@ -179,6 +202,24 @@
   </main>
 
   <script>
+    // Standard Cast.Al enclosure catalogue: diameter / height / cone height (mm).
+    // cone top diameter always matches the enclosure diameter it sits under.
+    const ENCLOSURE_PRESETS = {
+      "80x70":  { dia: 80,  height: 70,  cone: 30 },
+      "85x80":  { dia: 85,  height: 80,  cone: 35 },
+      "100x90": { dia: 100, height: 90,  cone: 40 },
+      "120x100":{ dia: 120, height: 100, cone: 45 },
+    };
+
+    function applyEnclosurePreset() {
+      const key = document.getElementById("encl_type").value;
+      const preset = ENCLOSURE_PRESETS[key];
+      document.getElementById("encl_diameter").value = preset.dia;
+      document.getElementById("encl_h").value = preset.height;
+      document.getElementById("cone_h").value = preset.cone;
+      document.getElementById("cone_top_diameter").value = preset.dia;
+    }
+
     function getDimensions() {
       return {
         L:                 document.getElementById("L").value,
@@ -189,6 +230,7 @@
         stop_height:       document.getElementById("stop_height").value,
         encl_diameter:     document.getElementById("encl_diameter").value,
         encl_h:            document.getElementById("encl_h").value,
+        encl_material:     "Cast.Al",
         lid_thk:           document.getElementById("lid_thk").value,
         cone_h:            document.getElementById("cone_h").value,
         adapter_od:        document.getElementById("adapter_od").value,
@@ -264,6 +306,10 @@
       btn.disabled = false;
       btn.textContent = "Generate 2D Drawing (PDF)";
     }
+
+    // Make sure the readonly fields match the default dropdown selection
+    // as soon as the page loads.
+    window.addEventListener("DOMContentLoaded", applyEnclosurePreset);
   </script>
 
 </body>
