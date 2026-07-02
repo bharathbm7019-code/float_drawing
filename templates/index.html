@@ -6,115 +6,85 @@
   <title>FloatSwitch Automation — SDN-204</title>
   <link rel="stylesheet" href="/static/style.css">
   <style>
-    /* Derived fields are shown but not editable — driven by the
-       Enclosure Type dropdown instead of manual entry. */
-    input[readonly] {
-      background: #f0f0f0;
-      color: #555;
-      cursor: not-allowed;
+    .catalog-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .float-points { display: flex; flex-direction: column; gap: 10px; }
+    .float-point-row { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 10px; }
+    .float-point-row label { font-weight: 600; color: #fff; }
+    .hidden { display: none !important; }
+    .spec-badge {
+      background: #1a2a3a; border: 1px solid #2a4a6a;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 12px; color: #aaccee; margin-top: 8px;
     }
-    .field .hint.derived {
-      color: #b00;
-      font-style: italic;
+    .spec-badge span { color: #55aaff; font-weight: 700; }
+    .section-num {
+      display: inline-block; background: #2a6aaa;
+      color: #fff; border-radius: 50%; width: 22px; height: 22px;
+      text-align: center; line-height: 22px; font-size: 12px;
+      font-weight: 700; margin-right: 8px;
     }
   </style>
 </head>
 <body>
-
+ 
   <header>
-    <h1>FloatSwitch 3D Generator</h1>
-    <p>SDN-204 · SHRIDHAN SENSORTEK · Enter dimensions below</p>
+    <h1>FloatSwitch Drawing Generator</h1>
+    <p>VFS Series · SHRIDHAN SENSORTEK · Configure your float switch below</p>
   </header>
-
+ 
   <main>
-
-    <!-- SECTION 1: STEM -->
+ 
+    <!-- ── 1. ELECTRICAL MODEL ─────────────────────────────── -->
     <section class="form-card">
-      <h2>Stem Dimensions (mm)</h2>
+      <h2><span class="section-num">1</span>Electrical Model</h2>
       <div class="form-grid">
         <div class="field">
-          <label for="L">Total Length — L (mm)</label>
-          <input type="number" id="L" value="830" min="100" max="5000">
-          <span class="hint">Collar bottom to tip</span>
+          <label for="electrical_model">Model Selection</label>
+          <select id="electrical_model" onchange="onModelChange()">
+            <option value="SDN 204">SDN 204 — SPDT, 500VDC / 250VAC, 1.5A</option>
+            <option value="SDN 202">SDN 202 — SPDT, 28VDC, 0.25A</option>
+            <option value="SDN 104">SDN 104 — SPST, 300VDC / 240VAC, 3A</option>
+            <option value="SDN 102">SDN 102 — SPST, 200VDC, 0.5A</option>
+          </select>
+          <span class="hint">VFS catalog Box 5</span>
         </div>
         <div class="field">
-          <label for="D2">Switching Point — D2 (mm)</label>
-          <input type="number" id="D2" value="780" min="50" max="4900">
-          <span class="hint">Falling level switch point</span>
-        </div>
-        <div class="field">
-          <label for="stem_diameter">Stem Diameter (mm)</label>
-          <input type="number" id="stem_diameter" value="12.7" min="5" max="50" step="0.1">
-          <span class="hint">Main rod diameter</span>
-        </div>
-        <div class="field">
-          <label for="float_diameter">Float Diameter (mm)</label>
-          <input type="number" id="float_diameter" value="25" min="10" max="100">
-          <span class="hint">SS 316 float ball</span>
-        </div>
-        <div class="field">
-          <label for="stopper_diameter">Stopper Diameter (mm)</label>
-          <input type="number" id="stopper_diameter" value="41" min="10" max="150">
-          <span class="hint">Bottom stopper outer diameter</span>
-        </div>
-        <div class="field">
-          <label for="stop_height">Stopper Height (mm)</label>
-          <input type="number" id="stop_height" value="15" min="5" max="50">
-          <span class="hint">Bottom stopper thickness</span>
+          <div class="spec-badge" id="elec-badge">
+            CONTACT FORM: <span id="badge-form">SPDT (1NO+1NC)</span> &nbsp;|&nbsp;
+            VOLTAGE: <span id="badge-volt">500VDC / 250VAC</span> &nbsp;|&nbsp;
+            CURRENT: <span id="badge-curr">1.5A</span> &nbsp;|&nbsp;
+            VA: <span id="badge-va">50VA</span>
+          </div>
         </div>
       </div>
     </section>
-
-    <!-- SECTION: FLANGE -->
+ 
+    <!-- ── 2. ENCLOSURE / TERMINAL TYPE ───────────────────── -->
     <section class="form-card">
-      <h2>Flange Details</h2>
+      <h2><span class="section-num">2</span>Enclosure / Terminal Type</h2>
       <div class="form-grid">
         <div class="field">
-          <label for="flange">Flange Material</label>
-          <select id="flange">
-            <option value="None">None</option>
-            <option value="SS304">SS304</option>
-            <option value="SS316">SS316</option>
-            <option value="CS">Carbon Steel</option>
+          <label for="terminal_type">Terminal Type</label>
+          <select id="terminal_type" onchange="onTerminalChange()">
+            <option value="F">F — Aluminium Junction Box (IP66)</option>
+            <option value="C">C — Weather Proof IP67 / SS304</option>
+            <option value="D">D — Weather Proof IP67 / Cast Al.</option>
+            <option value="E">E — Ex. Proof IP66 Gr IIA IIB IIC</option>
+            <option value="G">G — Polycarbonate Enclosure</option>
+            <option value="B">B — DIN Polyamide (upto 2 levels)</option>
+            <option value="A">A — Cable</option>
           </select>
-          <span class="hint">Select flange material</span>
-        </div>
-        <div class="field">
-          <label for="flange_od">Flange Outer Diameter (mm)</label>
-          <input type="number" id="flange_od" value="120" min="50" max="500">
-          <span class="hint">Overall flange OD</span>
-        </div>
-        <div class="field">
-          <label for="flange_thk">Flange Thickness (mm)</label>
-          <input type="number" id="flange_thk" value="12" min="5" max="60">
-          <span class="hint">Flange plate thickness</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION 2: ENCLOSURE -->
-    <section class="form-card">
-      <h2>Enclosure (Cast.Al)</h2>
-      <div class="form-grid">
-        <div class="field">
-          <label for="encl_type">Enclosure Type</label>
-          <select id="encl_type" onchange="applyEnclosurePreset()">
-            <option value="80x70">Cast.Al 80ø × 70 (Cone 30mm)</option>
-            <option value="85x80" selected>Cast.Al 85ø × 80 (Cone 35mm)</option>
-            <option value="100x90">Cast.Al 100ø × 90 (Cone 40mm)</option>
-            <option value="120x100">Cast.Al 120ø × 100 (Cone 45mm)</option>
-          </select>
-          <span class="hint">Standard Cast.Al enclosure size</span>
+          <span class="hint">VFS catalog Box 1</span>
         </div>
         <div class="field">
           <label for="encl_diameter">Enclosure Diameter (mm)</label>
-          <input type="number" id="encl_diameter" value="85" readonly>
-          <span class="hint derived">Set by Enclosure Type</span>
+          <input type="number" id="encl_diameter" value="85" min="40" max="300">
+          <span class="hint">Circular / equivalent diameter</span>
         </div>
         <div class="field">
           <label for="encl_h">Enclosure Height (mm)</label>
-          <input type="number" id="encl_h" value="80" readonly>
-          <span class="hint derived">Set by Enclosure Type</span>
+          <input type="number" id="encl_h" value="80" min="30" max="300">
+          <span class="hint">Body height</span>
         </div>
         <div class="field">
           <label for="lid_thk">Lid Thickness (mm)</label>
@@ -123,37 +93,179 @@
         </div>
       </div>
     </section>
-
-    <!-- SECTION 3: CONE / ADAPTER -->
+ 
+    <!-- ── 3. CONNECTION / MOUNTING ───────────────────────── -->
     <section class="form-card">
-      <h2>Cone / Adapter (mm)</h2>
+      <h2><span class="section-num">3</span>Connection / Mounting</h2>
       <div class="form-grid">
         <div class="field">
-          <label for="cone_h">Cone Height (mm)</label>
-          <input type="number" id="cone_h" value="35" readonly>
-          <span class="hint derived">Set by Enclosure Type</span>
+          <label for="connection_type">Connection Type</label>
+          <select id="connection_type" onchange="onConnectionChange()">
+            <optgroup label="── Adapter (no flange) ──">
+              <option value="adapter_3">3 — 2&quot; BSP Adapter</option>
+              <option value="adapter_1">1 — 1&quot; BSP Adapter</option>
+              <option value="adapter_2">2 — 1½&quot; BSP Adapter</option>
+              <option value="adapter_4">4 — 2&quot; NPT Adapter</option>
+              <option value="adapter_0">0 — ¼&quot; BSP Adapter</option>
+              <option value="adapter_5">5 — 3/8&quot; BSP Adapter</option>
+              <option value="adapter_6">6 — 1/8&quot; NPT Adapter</option>
+            </optgroup>
+            <optgroup label="── Flange ──">
+              <option value="flange_A">A — Dia. 75mm-60mm PCD</option>
+              <option value="flange_B">B — Dia. 75mm-65mm PCD</option>
+              <option value="flange_C">C — Dia. 100mm-80mm PCD</option>
+              <option value="flange_D">D — 2&quot; #150 ANSI</option>
+              <option value="flange_E">E — 2½&quot; #150 ANSI</option>
+              <option value="flange_F">F — 2½&quot; BS 10-E</option>
+              <option value="flange_G">G — 2&quot; BS 10-E</option>
+              <option value="flange_H">H — 1½&quot; #150 ANSI</option>
+              <option value="flange_K">K — Dia. 45mm-38mm PCD</option>
+              <option value="flange_L">L — Dia. 58.7mm-51mm PCD</option>
+            </optgroup>
+          </select>
+          <span class="hint">VFS catalog Box 2</span>
+        </div>
+        <div class="field" id="flange-material-field">
+          <label for="flange_material">Flange Material</label>
+          <select id="flange_material">
+            <option value="SS316">SS316</option>
+            <option value="SS304">SS304</option>
+            <option value="CS">Carbon Steel</option>
+            <option value="Aluminium">Aluminium</option>
+            <option value="Brass">Brass</option>
+          </select>
+          <span class="hint">Flange / Adapter material</span>
         </div>
         <div class="field">
-          <label for="adapter_od">Adapter Outer Diameter (mm)</label>
+          <label for="adapter_od">Adapter OD (mm)</label>
           <input type="number" id="adapter_od" value="69" min="20" max="200">
-          <span class="hint">2-BSP adapter OD at collar</span>
+          <span class="hint">2-BSP adapter outer diameter</span>
+        </div>
+        <div class="field" id="flange-od-field">
+          <label for="flange_od">Flange Outer Diameter (mm)</label>
+          <input type="number" id="flange_od" value="120" min="50" max="500">
+          <span class="hint">Flange OD</span>
+        </div>
+        <div class="field" id="flange-thk-field">
+          <label for="flange_thk">Flange Thickness (mm)</label>
+          <input type="number" id="flange_thk" value="12" min="5" max="60">
+          <span class="hint">Flange plate thickness</span>
         </div>
         <div class="field">
-          <label for="cone_top_diameter">Cone Top Diameter (mm)</label>
-          <input type="number" id="cone_top_diameter" value="85" readonly>
-          <span class="hint derived">Matches enclosure diameter</span>
-        </div>
-        <div class="field">
-          <label for="cone_bot_diameter">Cone Bottom Diameter (mm)</label>
-          <input type="number" id="cone_bot_diameter" value="36" min="10" max="150">
-          <span class="hint">Narrow end (collar side)</span>
+          <label for="cone_h">Cone Height (mm)</label>
+          <input type="number" id="cone_h" value="35" min="10" max="150">
+          <span class="hint">Adapter-to-enclosure taper height</span>
         </div>
       </div>
     </section>
-
-    <!-- SECTION 4: GLAND -->
+ 
+    <!-- ── 4. STEM ─────────────────────────────────────────── -->
     <section class="form-card">
-      <h2>M-20 Cable Gland (mm)</h2>
+      <h2><span class="section-num">4</span>Stem Configuration</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label for="stem_type">Stem Type</label>
+          <select id="stem_type" onchange="onStemChange()">
+            <option value="6">6 — Dia. 12.7mm · SS316</option>
+            <option value="2">2 — Dia. 12.7mm · SS304</option>
+            <option value="7">7 — Dia. 12.7mm · SS316L</option>
+            <option value="5">5 — Dia. 8mm · SS316</option>
+            <option value="1">1 — Dia. 8mm · SS304</option>
+            <option value="3">3 — Dia. 16.0mm · PP</option>
+            <option value="4">4 — Dia. 8mm · PP</option>
+          </select>
+          <span class="hint">VFS catalog Box 3</span>
+        </div>
+        <div class="field">
+          <label for="stem_diameter">Stem Diameter (mm)</label>
+          <input type="number" id="stem_diameter" value="12.7" step="0.1" min="5" max="50" readonly>
+          <span class="hint">Auto-filled from stem type</span>
+        </div>
+        <div class="field">
+          <label for="L">Total Length — L (mm)</label>
+          <input type="number" id="L" value="830" min="100" max="5000">
+          <span class="hint">Collar bottom to stopper tip</span>
+        </div>
+        <div class="field">
+          <label for="stopper_diameter">Stopper Diameter (mm)</label>
+          <input type="number" id="stopper_diameter" value="41" min="10" max="150">
+          <span class="hint">Bottom stopper OD</span>
+        </div>
+        <div class="field">
+          <label for="stop_height">Stopper Height (mm)</label>
+          <input type="number" id="stop_height" value="15" min="5" max="50">
+          <span class="hint">Stopper thickness</span>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- ── 5. FLOAT CONFIGURATION ─────────────────────────── -->
+    <section class="form-card">
+      <h2><span class="section-num">5</span>Float Configuration</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label for="float_type">Float Type</label>
+          <select id="float_type" onchange="onFloatTypeChange()">
+            <optgroup label="── Stainless Steel ──">
+              <option value="S4">S4 — SS316, Dia. 52mm (stem 12.7mm)</option>
+              <option value="S3">S3 — SS316, Dia. 41mm (stem 12.7mm)</option>
+              <option value="S6">S6 — SS316, Dia. 45mm (stem 12.7mm)</option>
+              <option value="S5">S5 — SS316L, Dia. 52mm (stem 12.7mm)</option>
+              <option value="S2">S2 — SS316, Dia. 30mm (stem 8mm)</option>
+              <option value="S1">S1 — SS316, Dia. 28mm (stem 8mm)</option>
+            </optgroup>
+            <optgroup label="── Plastic ──">
+              <option value="P3">P3 — PU, Dia. 35mm (stem 12.7mm)</option>
+              <option value="P4">P4 — PP, Dia. 46mm (stem 16mm)</option>
+              <option value="P5">P5 — PVDF, Dia. 48mm (stem 16mm)</option>
+              <option value="P1">P1 — PU, Dia. 25mm (stem 8mm)</option>
+              <option value="P2">P2 — PP, Dia. 25mm (stem 8mm)</option>
+            </optgroup>
+          </select>
+          <span class="hint">VFS catalog Box 4</span>
+        </div>
+        <div class="field">
+          <label for="float_diameter">Float Diameter (mm)</label>
+          <input type="number" id="float_diameter" value="52" min="10" max="120" readonly>
+          <span class="hint">Auto-filled from float type</span>
+        </div>
+        <div class="field">
+          <label for="num_floats">Number of Switch Points</label>
+          <select id="num_floats" onchange="onFloatCountChange()">
+            <option value="1">1 Float — D2 only</option>
+            <option value="2">2 Floats — D2 + D3</option>
+            <option value="3">3 Floats — D2 + D3 + D4</option>
+          </select>
+          <span class="hint">Max D4 supported</span>
+        </div>
+      </div>
+ 
+      <!-- Switch point inputs -->
+      <div class="float-points" style="margin-top:16px;">
+        <div class="float-point-row">
+          <label>D2 — Switch Point 1 (mm)</label>
+          <input type="number" id="D2" value="780" min="10" max="4900"
+                 style="background:#1a2a3a;border:1px solid #2a4a6a;color:#fff;padding:10px;border-radius:8px;">
+          <span class="hint" style="color:#888;font-size:11px;">From collar bottom (falling level)</span>
+        </div>
+        <div class="float-point-row hidden" id="d3-row">
+          <label>D3 — Switch Point 2 (mm)</label>
+          <input type="number" id="D3" value="500" min="10" max="4900"
+                 style="background:#1a2a3a;border:1px solid #2a4a6a;color:#fff;padding:10px;border-radius:8px;">
+          <span class="hint" style="color:#888;font-size:11px;">Must be less than D2</span>
+        </div>
+        <div class="float-point-row hidden" id="d4-row">
+          <label>D4 — Switch Point 3 (mm)</label>
+          <input type="number" id="D4" value="250" min="10" max="4900"
+                 style="background:#1a2a3a;border:1px solid #2a4a6a;color:#fff;padding:10px;border-radius:8px;">
+          <span class="hint" style="color:#888;font-size:11px;">Must be less than D3</span>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- ── 6. CABLE GLAND ─────────────────────────────────── -->
+    <section class="form-card">
+      <h2><span class="section-num">6</span>M-20 Cable Gland</h2>
       <div class="form-grid">
         <div class="field">
           <label for="gland_diameter">Gland Diameter (mm)</label>
@@ -167,150 +279,231 @@
         </div>
       </div>
     </section>
-
-    <!-- BUTTONS -->
+ 
+    <!-- ── BUTTONS ────────────────────────────────────────── -->
     <section class="form-card">
-      <button id="generate-btn" onclick="generate()">
-        Generate 3D Model
-      </button>
-      <button id="drawing-btn" onclick="generateDrawing()">
-        Generate 2D Drawing (PDF)
-      </button>
+      <button id="generate-btn" onclick="generate()">Generate 3D Model</button>
+      <button id="drawing-btn" onclick="generateDrawing()">Generate 2D Drawing (PDF)</button>
     </section>
-
-    <!-- STATUS -->
+ 
     <section id="status-box" class="status-box hidden">
       <div id="status-msg">Processing...</div>
     </section>
-
-    <!-- DOWNLOADS -->
+ 
     <section id="downloads" class="downloads hidden">
       <h2>Download Your Files</h2>
       <div class="download-grid">
-        <a href="/download/obj" class="download-btn obj">
-          Download OBJ (3D Model)
-        </a>
-        <a href="/download/png" class="download-btn png">
-          Download PNG (Render)
-        </a>
-        <a href="/download/pdf" class="download-btn pdf">
-          Download PDF (2D Drawing)
-        </a>
+        <a href="/download/obj" class="download-btn obj">Download OBJ (3D Model)</a>
+        <a href="/download/png" class="download-btn png">Download PNG (Render)</a>
+        <a href="/download/pdf" class="download-btn pdf">Download PDF (2D Drawing)</a>
       </div>
     </section>
-
+ 
   </main>
-
+ 
   <script>
-    // Standard Cast.Al enclosure catalogue: diameter / height / cone height (mm).
-    // cone top diameter always matches the enclosure diameter it sits under.
-    const ENCLOSURE_PRESETS = {
-      "80x70":  { dia: 80,  height: 70,  cone: 30 },
-      "85x80":  { dia: 85,  height: 80,  cone: 35 },
-      "100x90": { dia: 100, height: 90,  cone: 40 },
-      "120x100":{ dia: 120, height: 100, cone: 45 },
+  // ── Catalog data ─────────────────────────────────────────
+  const FLOAT_TYPES = {
+    'S1': {material:'SS316',  float_d:28,  stem_d:8},
+    'S2': {material:'SS316',  float_d:30,  stem_d:8},
+    'S3': {material:'SS316',  float_d:41,  stem_d:12.7},
+    'S4': {material:'SS316',  float_d:52,  stem_d:12.7},
+    'S5': {material:'SS316L', float_d:52,  stem_d:12.7},
+    'S6': {material:'SS316',  float_d:45,  stem_d:12.7},
+    'P1': {material:'PU',     float_d:25,  stem_d:8},
+    'P2': {material:'PP',     float_d:25,  stem_d:8},
+    'P3': {material:'PU',     float_d:35,  stem_d:12.7},
+    'P4': {material:'PP',     float_d:46,  stem_d:16},
+    'P5': {material:'PVDF',   float_d:48,  stem_d:16},
+  };
+ 
+  const STEM_TYPES = {
+    '1': {diameter:8,    material:'SS304'},
+    '2': {diameter:12.7, material:'SS304'},
+    '3': {diameter:16.0, material:'PP'},
+    '4': {diameter:8,    material:'PP'},
+    '5': {diameter:8,    material:'SS316'},
+    '6': {diameter:12.7, material:'SS316'},
+    '7': {diameter:12.7, material:'SS316L'},
+  };
+ 
+  const ELEC_SPECS = {
+    'SDN 102': {form:'SPST',          voltage:'200V DC',           current:'0.5A',  va:'15VA'},
+    'SDN 104': {form:'SPST',          voltage:'300V DC / 240V AC', current:'3A',    va:'100VA'},
+    'SDN 202': {form:'SPDT (1NO+1NC)',voltage:'28V DC',             current:'0.25A', va:'3VA'},
+    'SDN 204': {form:'SPDT (1NO+1NC)',voltage:'500V DC / 250V AC', current:'1.5A',  va:'50VA'},
+  };
+ 
+  // Flange defaults by connection type code
+  const FLANGE_DEFAULTS = {
+    'flange_A': {od:75,  thk:10, desc:'75mm PCD'},
+    'flange_B': {od:75,  thk:10, desc:'75mm-65mm PCD'},
+    'flange_C': {od:100, thk:12, desc:'100mm-80mm PCD'},
+    'flange_D': {od:150, thk:16, desc:'2" #150 ANSI'},
+    'flange_E': {od:165, thk:17, desc:'2½" #150 ANSI'},
+    'flange_F': {od:165, thk:17, desc:'2½" BS 10-E'},
+    'flange_G': {od:150, thk:16, desc:'2" BS 10-E'},
+    'flange_H': {od:130, thk:14, desc:'1½" #150 ANSI'},
+    'flange_K': {od:45,  thk:8,  desc:'45mm-38mm PCD'},
+    'flange_L': {od:59,  thk:9,  desc:'58.7mm-51mm PCD'},
+  };
+ 
+  // ── Event handlers ───────────────────────────────────────
+  function onModelChange() {
+    const m = document.getElementById('electrical_model').value;
+    const s = ELEC_SPECS[m];
+    document.getElementById('badge-form').textContent = s.form;
+    document.getElementById('badge-volt').textContent = s.voltage;
+    document.getElementById('badge-curr').textContent = s.current;
+    document.getElementById('badge-va').textContent   = s.va;
+  }
+ 
+  function onStemChange() {
+    const t = document.getElementById('stem_type').value;
+    const s = STEM_TYPES[t];
+    document.getElementById('stem_diameter').value = s.diameter;
+  }
+ 
+  function onFloatTypeChange() {
+    const t  = document.getElementById('float_type').value;
+    const ft = FLOAT_TYPES[t];
+    document.getElementById('float_diameter').value = ft.float_d;
+    // Suggest matching stem if user hasn't manually changed it
+    document.getElementById('stem_diameter').value  = ft.stem_d;
+  }
+ 
+  function onFloatCountChange() {
+    const n = parseInt(document.getElementById('num_floats').value);
+    document.getElementById('d3-row').classList.toggle('hidden', n < 2);
+    document.getElementById('d4-row').classList.toggle('hidden', n < 3);
+  }
+ 
+  function onConnectionChange() {
+    const ct = document.getElementById('connection_type').value;
+    const isFlange = ct.startsWith('flange_');
+    document.getElementById('flange-od-field').classList.toggle('hidden', !isFlange);
+    document.getElementById('flange-thk-field').classList.toggle('hidden', !isFlange);
+    if (isFlange && FLANGE_DEFAULTS[ct]) {
+      const fd = FLANGE_DEFAULTS[ct];
+      document.getElementById('flange_od').value  = fd.od;
+      document.getElementById('flange_thk').value = fd.thk;
+    }
+  }
+ 
+  function onTerminalChange() {
+    // Preset enclosure dimensions per terminal type
+    const presets = {
+      'F': {d:85,  h:80},   // Aluminium Junction Box
+      'C': {d:85,  h:80},   // WP SS304
+      'D': {d:90,  h:85},   // WP Cast Al
+      'E': {d:100, h:90},   // Ex-Proof
+      'G': {d:75,  h:70},   // Polycarbonate
+      'B': {d:70,  h:65},   // DIN
+      'A': {d:0,   h:0},    // Cable (no enclosure)
     };
-
-    function applyEnclosurePreset() {
-      const key = document.getElementById("encl_type").value;
-      const preset = ENCLOSURE_PRESETS[key];
-      document.getElementById("encl_diameter").value = preset.dia;
-      document.getElementById("encl_h").value = preset.height;
-      document.getElementById("cone_h").value = preset.cone;
-      document.getElementById("cone_top_diameter").value = preset.dia;
+    const t = document.getElementById('terminal_type').value;
+    if (presets[t] && presets[t].d > 0) {
+      document.getElementById('encl_diameter').value = presets[t].d;
+      document.getElementById('encl_h').value        = presets[t].h;
     }
-
-    function getDimensions() {
-      return {
-        L:                 document.getElementById("L").value,
-        D2:                document.getElementById("D2").value,
-        stem_diameter:     document.getElementById("stem_diameter").value,
-        float_diameter:    document.getElementById("float_diameter").value,
-        stopper_diameter:  document.getElementById("stopper_diameter").value,
-        stop_height:       document.getElementById("stop_height").value,
-        encl_diameter:     document.getElementById("encl_diameter").value,
-        encl_h:            document.getElementById("encl_h").value,
-        encl_material:     "Cast.Al",
-        lid_thk:           document.getElementById("lid_thk").value,
-        cone_h:            document.getElementById("cone_h").value,
-        adapter_od:        document.getElementById("adapter_od").value,
-        cone_top_diameter: document.getElementById("cone_top_diameter").value,
-        cone_bot_diameter: document.getElementById("cone_bot_diameter").value,
-        gland_diameter:    document.getElementById("gland_diameter").value,
-        gland_depth:       document.getElementById("gland_depth").value,
-        flange:            document.getElementById("flange").value,
-        flange_od:         document.getElementById("flange_od").value,
-        flange_thk:        document.getElementById("flange_thk").value,
-      };
-    }
-
-    function setStatus(type, msg) {
-      const box = document.getElementById("status-box");
-      box.classList.remove("hidden");
-      box.className = "status-box " + type;
-      document.getElementById("status-msg").textContent = msg;
-    }
-
-    async function generate() {
-      const btn = document.getElementById("generate-btn");
-      document.getElementById("downloads").classList.add("hidden");
-      btn.disabled = true;
-      btn.textContent = "Generating... (1-2 min)";
-      setStatus("loading", "Blender is running in background. Please wait...");
-
-      try {
-        const res = await fetch("/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(getDimensions())
-        });
-        const result = await res.json();
-        if (result.success) {
-          setStatus("success", "3D Model generated successfully!");
-          document.getElementById("downloads").classList.remove("hidden");
-        } else {
-          setStatus("error", "Error: " + result.error);
-        }
-      } catch (err) {
-        setStatus("error", "Connection error: " + err.message);
-      }
-
-      btn.disabled = false;
-      btn.textContent = "Generate 3D Model";
-    }
-
-    async function generateDrawing() {
-      const btn = document.getElementById("drawing-btn");
-      document.getElementById("downloads").classList.add("hidden");
-      btn.disabled = true;
-      btn.textContent = "Generating PDF...";
-      setStatus("loading", "Creating 2D technical drawing...");
-
-      try {
-        const res = await fetch("/generate-drawing", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(getDimensions())
-        });
-        const result = await res.json();
-        if (result.success) {
-          setStatus("success", "2D Drawing ready! Click Download PDF below.");
-          document.getElementById("downloads").classList.remove("hidden");
-        } else {
-          setStatus("error", "Error: " + result.error);
-        }
-      } catch (err) {
-        setStatus("error", "Connection error: " + err.message);
-      }
-
-      btn.disabled = false;
-      btn.textContent = "Generate 2D Drawing (PDF)";
-    }
-
-    // Make sure the readonly fields match the default dropdown selection
-    // as soon as the page loads.
-    window.addEventListener("DOMContentLoaded", applyEnclosurePreset);
+  }
+ 
+  // ── Build dimensions object ──────────────────────────────
+  function getDimensions() {
+    const n  = parseInt(document.getElementById('num_floats').value);
+    const ft = document.getElementById('float_type').value;
+    const ct = document.getElementById('connection_type').value;
+ 
+    const dims = {
+      // Electrical
+      electrical_model: document.getElementById('electrical_model').value,
+      // Enclosure
+      terminal_type:  document.getElementById('terminal_type').value,
+      encl_diameter:  document.getElementById('encl_diameter').value,
+      encl_h:         document.getElementById('encl_h').value,
+      lid_thk:        document.getElementById('lid_thk').value,
+      // Connection
+      connection_type: ct,
+      adapter_od:     document.getElementById('adapter_od').value,
+      flange:         ct.startsWith('flange_')
+                        ? document.getElementById('flange_material').value
+                        : 'None',
+      flange_od:      document.getElementById('flange_od').value,
+      flange_thk:     document.getElementById('flange_thk').value,
+      cone_h:         document.getElementById('cone_h').value,
+      // Stem
+      stem_type:      document.getElementById('stem_type').value,
+      stem_diameter:  document.getElementById('stem_diameter').value,
+      L:              document.getElementById('L').value,
+      stopper_diameter: document.getElementById('stopper_diameter').value,
+      stop_height:    document.getElementById('stop_height').value,
+      // Float
+      float_type:     ft,
+      float_material: FLOAT_TYPES[ft] ? FLOAT_TYPES[ft].material : 'SS316',
+      float_diameter: document.getElementById('float_diameter').value,
+      num_floats:     n,
+      D2:             document.getElementById('D2').value,
+      // Gland
+      gland_diameter: document.getElementById('gland_diameter').value,
+      gland_depth:    document.getElementById('gland_depth').value,
+    };
+ 
+    if (n >= 2) dims.D3 = document.getElementById('D3').value;
+    if (n >= 3) dims.D4 = document.getElementById('D4').value;
+ 
+    return dims;
+  }
+ 
+  // ── Status helper ────────────────────────────────────────
+  function setStatus(type, msg) {
+    const box = document.getElementById('status-box');
+    box.classList.remove('hidden');
+    box.className = 'status-box ' + type;
+    document.getElementById('status-msg').textContent = msg;
+  }
+ 
+  // ── Generate 3D ──────────────────────────────────────────
+  async function generate() {
+    const btn = document.getElementById('generate-btn');
+    document.getElementById('downloads').classList.add('hidden');
+    btn.disabled = true; btn.textContent = 'Generating... (1-2 min)';
+    setStatus('loading', 'Blender is running in background. Please wait...');
+    try {
+      const res    = await fetch('/generate', {method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(getDimensions())});
+      const result = await res.json();
+      if (result.success) {
+        setStatus('success','3D Model generated successfully!');
+        document.getElementById('downloads').classList.remove('hidden');
+      } else { setStatus('error','Error: '+result.error); }
+    } catch(err) { setStatus('error','Connection error: '+err.message); }
+    btn.disabled = false; btn.textContent = 'Generate 3D Model';
+  }
+ 
+  // ── Generate PDF ─────────────────────────────────────────
+  async function generateDrawing() {
+    const btn = document.getElementById('drawing-btn');
+    document.getElementById('downloads').classList.add('hidden');
+    btn.disabled = true; btn.textContent = 'Generating PDF...';
+    setStatus('loading','Creating 2D technical drawing...');
+    try {
+      const res    = await fetch('/generate-drawing', {method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(getDimensions())});
+      const result = await res.json();
+      if (result.success) {
+        setStatus('success','2D Drawing ready! Click Download PDF below.');
+        document.getElementById('downloads').classList.remove('hidden');
+      } else { setStatus('error','Error: '+result.error); }
+    } catch(err) { setStatus('error','Connection error: '+err.message); }
+    btn.disabled = false; btn.textContent = 'Generate 2D Drawing (PDF)';
+  }
+ 
+  // ── Init ─────────────────────────────────────────────────
+  onConnectionChange();
+  onTerminalChange();
   </script>
-
+ 
 </body>
 </html>
